@@ -1,0 +1,5 @@
+id,F1_1_overallqol,F1_2_satisfactionwithhealth,F1_3_enjoymentoflife,F1_4_perceivedmeaninginlife,F2_1_energyfordailyactivities,F2_2_satisfactionwithsleep,F3_1_performdailyactivities,F3_2_capacityforwork
+E001,5,5.0,5,5,5,5,5,5
+E002,1,1.0,1,1,1,1,1,1
+E003,3,3.0,3,3,3,3,3,3
+E004,4,,4,3,999,4,2,3

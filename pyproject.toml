@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "afya-medqol"
+version = "1.9.0"
+description = "Cálculo de índices de qualidade de vida Afya — MedQoL (médicos) e IQoL (estudantes de medicina)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "Afya" },
+]
+keywords = ["medqol", "iqol", "qualidade-de-vida", "irt", "grm", "bifactor", "psicometria", "afya"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Healthcare Industry",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "numpy>=1.23",
+    "pandas>=1.5",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=7.0"]
+
+[project.urls]
+Homepage = "https://github.com/afya/afya-medqol"
+Repository = "https://github.com/afya/afya-medqol"
+
+[project.scripts]
+afya-medqol = "afya_medqol.cli:main"
+iqol-estudante = "afya_medqol.cli_student:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+afya_medqol = ["py.typed"]

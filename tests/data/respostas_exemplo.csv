@@ -1,0 +1,5 @@
+id,F1_1_enjoymentoflife,F1_2_financialsufficiency,F1_3_accesstoinformation,F1_4_leisureopportunities,F1_5_mobilitypast2weeks,F1_6_accesstohealthservices,F2_1_technicaltraining,F2_2_mentalhealthsupport,F2_3_coworkersupportnetwork,F2_4_educationalhandlingoferrors,F3_1_stresshurtsperformance,F3_2_stressledtoerrors,F3_3_stresshurtsrelationships
+resp_alto_bem_estar,5,5,5,5,5,5,5,5,5,5,1,1,1
+resp_critico,1,1,1,1,1,1,1,1,1,1,5,5,5
+resp_intermediario,3,3,3,3,3,3,3,3,3,3,3,3,3
+resp_com_omissos,4,,4,4,3,4,999,4,4,3,2,2,2
