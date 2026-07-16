@@ -1,4 +1,4 @@
-"""Motor psicométrico: quadratura 3D, probabilidades GRM e escoragem EAP."""
+"""Psychometric engine: 3D quadrature, GRM probabilities, and EAP scoring."""
 
 from __future__ import annotations
 
@@ -6,14 +6,14 @@ from itertools import product
 
 import numpy as np
 
-from .constants_physician import N_CATEGORIAS
+from .constants_physician import N_CATEGORIES
 
 
 def build_quadrature(sigma: np.ndarray, n_grid: int, limite: float = 5.0):
-    """Constrói a grade de quadratura 3D e o prior normal trivariado.
+    """Build the 3D quadrature grid and the trivariate normal prior.
 
-    Como Σ é diagonal por construção (domínios independentes), o EAP
-    resultante equivale a três EAPs unidimensionais independentes.
+    Since Σ is diagonal by construction (independent domains), the
+    resulting EAP is equivalent to three independent unidimensional EAPs.
     """
     nodes = np.linspace(-limite, limite, n_grid)
     grid = np.array(list(product(nodes, nodes, nodes)))
@@ -27,10 +27,10 @@ def build_quadrature(sigma: np.ndarray, n_grid: int, limite: float = 5.0):
 
 
 def precompute_item_logp(A: np.ndarray, B: np.ndarray, grid: np.ndarray) -> np.ndarray:
-    """Log-probabilidade GRM (Samejima) de cada categoria, por item e nó da grade."""
+    """GRM (Samejima) log-probability of each category, per item and grid node."""
     n_itens = A.shape[0]
     n_pts = grid.shape[0]
-    K = N_CATEGORIAS
+    K = N_CATEGORIES
     out = np.zeros((n_itens, K, n_pts))
     for i in range(n_itens):
         eta = grid @ A[i]
@@ -48,13 +48,13 @@ def precompute_item_logp(A: np.ndarray, B: np.ndarray, grid: np.ndarray) -> np.n
 def compute_eap(
     answers: np.ndarray, item_logp: np.ndarray, grid: np.ndarray, prior: np.ndarray
 ) -> np.ndarray:
-    """Escore EAP (θ_F1, θ_F2, θ_F3) de um respondente a partir das respostas brutas."""
+    """EAP score (θ_F1, θ_F2, θ_F3) of a respondent from raw answers."""
     log_like = np.zeros(grid.shape[0])
     for i, x in enumerate(answers):
         if np.isnan(x):
             continue
         k = int(x) - 1
-        if k < 0 or k >= N_CATEGORIAS:
+        if k < 0 or k >= N_CATEGORIES:
             continue
         log_like += item_logp[i, k]
     post = prior * np.exp(log_like - log_like.max())

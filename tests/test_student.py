@@ -24,8 +24,8 @@ def test_item_questions_disponivel_na_instancia(calc):
     pt = calc.item_questions(lang="pt")
     assert en["F1_1_overallqol"] == "22. How would you rate your quality of life?"
     assert pt["F1_1_overallqol"] == "22. Pensando nas duas últimas semanas, como você avaliaria sua qualidade de vida?"
-    assert set(en.keys()) == set(calc.itens)
-    assert set(pt.keys()) == set(calc.itens)
+    assert set(en.keys()) == set(calc.items)
+    assert set(pt.keys()) == set(calc.items)
 
 
 def test_nao_calcula_score_centesimal(df_resultado):
@@ -80,10 +80,8 @@ def test_score_student_bate_com_score_batch(calc):
     assert "score_global_centesimal" not in unico
 
 
-def test_calculate_index_student_com_caminho_csv(tmp_path):
-    saida = tmp_path / "saida.csv"
-    out = calculate_index_student(DADOS, caminho_saida=str(saida))
-    assert saida.exists()
+def test_calculate_index_student_aceita_caminho_csv():
+    out = calculate_index_student(DADOS)
     assert len(out) == 4
 
 

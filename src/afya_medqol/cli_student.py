@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 
 from .api import calculate_index_student
 
@@ -16,9 +17,16 @@ def main() -> None:
     parser.add_argument("--saida", default=None, help="Caminho do CSV de saída.")
     args = parser.parse_args()
 
-    out = calculate_index_student(args.answers, args.saida)
+    out = calculate_index_student(args.answers)
+
+    output_path = args.saida
+    if output_path is None:
+        base, _ = os.path.splitext(args.answers)
+        output_path = f"{base}_scores_iqol.csv"
+    out.to_csv(output_path, index=False, sep=";", encoding="utf-8-sig")
 
     print(f"OK — {len(out)} respondentes processados")
+    print(f"Resultado salvo em: {output_path}")
     print("\nT-score global — média ± dp:")
     s = out["T_score_global"].dropna()
     print(f"  T_score_global: {s.mean():.2f} ± {s.std():.2f}")

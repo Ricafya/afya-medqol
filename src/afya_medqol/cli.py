@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 
 from .api import calculate_index_physician
 
@@ -16,9 +17,16 @@ def main() -> None:
     parser.add_argument("--saida", default=None, help="Caminho do CSV de saída.")
     args = parser.parse_args()
 
-    out = calculate_index_physician(args.answers, args.saida)
+    out = calculate_index_physician(args.answers)
+
+    output_path = args.saida
+    if output_path is None:
+        base, _ = os.path.splitext(args.answers)
+        output_path = f"{base}_scores_2024_2.csv"
+    out.to_csv(output_path, index=False, sep=";", encoding="utf-8-sig")
 
     print(f"OK — {len(out)} respondentes processados")
+    print(f"Resultado salvo em: {output_path}")
     print("\nT-score — média ± dp:")
     for col in ("T_score_F1", "T_score_F2", "T_score_F3", "T_score_global"):
         s = out[col].dropna()

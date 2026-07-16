@@ -1,4 +1,4 @@
-"""Constantes do modelo IQoL (estudantes de medicina, 8 itens, bifatorial)."""
+"""Constants for the IQoL model (medical students, 8 items, bifactor)."""
 
 from __future__ import annotations
 
@@ -6,11 +6,11 @@ STUDENT_ITEMS = [
     "F1_1_overallqol", "F1_2_satisfactionwithhealth", "F1_3_enjoymentoflife", "F1_4_perceivedmeaninginlife", "F2_1_energyfordailyactivities", "F2_2_satisfactionwithsleep", "F3_1_performdailyactivities", "F3_2_capacityforwork",
 ]
 
-N_CATEGORIAS_ESTUDANTE = 5
-N_GRID_ESTUDANTE = 121
-LIMITE_GRID_ESTUDANTE = 6.0
+N_CATEGORIES_STUDENT = 5
+N_GRID_STUDENT = 121
+GRID_LIMIT_STUDENT = 6.0
 
-MISSING_CODE_ESTUDANTE = 999
+MISSING_CODE_STUDENT = 999
 
 # Original questionnaire wording for each item, for display/reference purposes
 # only — not used by the scoring pipeline itself. Keyed by item, then by

@@ -2,17 +2,15 @@
 
 from __future__ import annotations
 
-import os
-
 import numpy as np
 import pandas as pd
 
 from .constants_physician import ITEM_QUESTIONS, N_GRID
 from .constants_student import (
     ITEM_QUESTIONS as ITEM_QUESTIONS_ESTUDANTE,
-    LIMITE_GRID_ESTUDANTE,
-    MISSING_CODE_ESTUDANTE,
-    N_GRID_ESTUDANTE,
+    GRID_LIMIT_STUDENT,
+    MISSING_CODE_STUDENT,
+    N_GRID_STUDENT,
 )
 from .core_physician import build_quadrature, compute_eap, precompute_item_logp
 from .core_student import build_bifactor_quadrature, combine_bifactor_posterior, compute_domain_marginals
@@ -37,7 +35,7 @@ class MedQoLCalculator:
         )
 
     @property
-    def itens(self) -> list[str]:
+    def items(self) -> list[str]:
         return self.parameters["ITEMS"]
 
     def item_questions(self, lang: str = "en") -> dict[str, str]:
@@ -47,10 +45,10 @@ class MedQoLCalculator:
         """
         return {item: translations[lang] for item, translations in ITEM_QUESTIONS.items()}
 
-    def _thetas(self, dat: pd.DataFrame) -> np.ndarray:
-        thetas = np.full((len(dat), 3), np.nan)
-        for idx in range(len(dat)):
-            row = dat.iloc[idx].to_numpy(dtype=float)
+    def _thetas(self, data: pd.DataFrame) -> np.ndarray:
+        thetas = np.full((len(data), 3), np.nan)
+        for idx in range(len(data)):
+            row = data.iloc[idx].to_numpy(dtype=float)
             if np.all(np.isnan(row)):
                 continue
             thetas[idx] = compute_eap(row, self.item_logp, self.grid, self.prior)
@@ -68,8 +66,8 @@ class MedQoLCalculator:
         if missing_columns:
             raise ValueError(f"Missing columns in the answers DataFrame: {sorted(missing_columns)}")
 
-        dat = answers[par["ITEMS"]].apply(pd.to_numeric, errors="coerce").replace(999, np.nan)
-        thetas = self._thetas(dat)
+        data = answers[par["ITEMS"]].apply(pd.to_numeric, errors="coerce").replace(999, np.nan)
+        thetas = self._thetas(data)
 
         out = answers.copy()
         out["theta1_quality_of_life"] = thetas[:, 0]
@@ -77,8 +75,8 @@ class MedQoLCalculator:
         out["theta3_perceived_stress"] = thetas[:, 2]
 
         w = par["WEIGHTS"]
-        sinal_f3 = -1.0 if par["F3_REVERSE_GLOBAL"] else 1.0
-        theta_global = w[0] * thetas[:, 0] + w[1] * thetas[:, 1] + sinal_f3 * w[2] * thetas[:, 2]
+        f3_sign = -1.0 if par["F3_REVERSE_GLOBAL"] else 1.0
+        theta_global = w[0] * thetas[:, 0] + w[1] * thetas[:, 1] + f3_sign * w[2] * thetas[:, 2]
         out["theta_global"] = theta_global
 
         out["T_score_F1"] = 50.0 + 10.0 * thetas[:, 0]
@@ -95,38 +93,25 @@ class MedQoLCalculator:
         result (they remain computed and available via :meth:`score_batch`).
         """
         df = pd.DataFrame([answers])
-        resultado = self.score_batch(df).iloc[0].to_dict()
-        for chave in ("T_score_F1", "T_score_F2", "T_score_F3"):
-            resultado.pop(chave, None)
-        return resultado
+        result = self.score_batch(df).iloc[0].to_dict()
+        for key in ("T_score_F1", "T_score_F2", "T_score_F3"):
+            result.pop(key, None)
+        return result
 
 
-def calculate_index_physician(
-    answers: pd.DataFrame | str,
-    caminho_saida: str | None = None,
-) -> pd.DataFrame:
+def calculate_index_physician(answers: pd.DataFrame | str) -> pd.DataFrame:
     """Convenience function equivalent to the original script.
 
-    ``answers`` can be an already-loaded DataFrame or a path to a
-    CSV file. If ``caminho_saida`` is given (or ``answers`` is a
-    path), the result is also saved to CSV (``;``-separated).
+    ``answers`` can be an already-loaded DataFrame or a path to a CSV file.
     """
     calc = MedQoLCalculator()
 
     if isinstance(answers, str):
-        df_resp = pd.read_csv(answers, sep=None, engine="python")
-        if caminho_saida is None:
-            base, _ = os.path.splitext(answers)
-            caminho_saida = f"{base}_scores_2024_2.csv"
+        df_answers = pd.read_csv(answers, sep=None, engine="python")
     else:
-        df_resp = answers
+        df_answers = answers
 
-    out = calc.score_batch(df_resp)
-
-    if caminho_saida is not None:
-        out.to_csv(caminho_saida, index=False, sep=";", encoding="utf-8-sig")
-
-    return out
+    return calc.score_batch(df_answers)
 
 
 class IQoLCalculator:
@@ -140,12 +125,12 @@ class IQoLCalculator:
     batches.
     """
 
-    def __init__(self, n_grid: int = N_GRID_ESTUDANTE, limite: float = LIMITE_GRID_ESTUDANTE):
+    def __init__(self, n_grid: int = N_GRID_STUDENT, limite: float = GRID_LIMIT_STUDENT):
         self.parameters = load_parameters_student()
-        self.grid, self.phi, self.malha_g, self.malha_s = build_bifactor_quadrature(n_grid, limite)
+        self.grid, self.phi, self.mesh_g, self.mesh_s = build_bifactor_quadrature(n_grid, limite)
 
     @property
-    def itens(self) -> list[str]:
+    def items(self) -> list[str]:
         return list(self.parameters["ITEMS"].keys())
 
     def item_questions(self, lang: str = "en") -> dict[str, str]:
@@ -156,9 +141,9 @@ class IQoLCalculator:
         return {item: translations[lang] for item, translations in ITEM_QUESTIONS_ESTUDANTE.items()}
 
     def _coerce_answers(self, answers: pd.DataFrame) -> pd.DataFrame:
-        dat = answers[self.itens].apply(pd.to_numeric, errors="coerce").round()
-        dentro_do_intervalo = (dat >= 1) & (dat <= 5)
-        return dat.where(dentro_do_intervalo, MISSING_CODE_ESTUDANTE).astype(int)
+        data = answers[self.items].apply(pd.to_numeric, errors="coerce").round()
+        within_range = (data >= 1) & (data <= 5)
+        return data.where(within_range, MISSING_CODE_STUDENT).astype(int)
 
     def score_batch(self, answers: pd.DataFrame) -> pd.DataFrame:
         """Score a DataFrame of IQoL respondents and return a new DataFrame.
@@ -168,47 +153,47 @@ class IQoLCalculator:
         values, values outside the 1-5 range, or ``999`` are treated as missing.
         """
         par = self.parameters
-        missing_columns = set(self.itens) - set(answers.columns)
+        missing_columns = set(self.items) - set(answers.columns)
         if missing_columns:
             raise ValueError(f"Missing columns in the answers DataFrame: {sorted(missing_columns)}")
 
-        dat = self._coerce_answers(answers)
+        data = self._coerce_answers(answers)
         domains = par["DOMAINS"]
         factors = sorted(domains)
 
         cache: dict[int, dict[tuple, tuple[np.ndarray, np.ndarray]]] = {f: {} for f in factors}
 
-        def cached_marginals(f: int, respostas_dominio: tuple[int, ...]):
-            if respostas_dominio not in cache[f]:
-                cache[f][respostas_dominio] = compute_domain_marginals(
-                    par["ITEMS"], domains[f], respostas_dominio,
-                    self.malha_g, self.malha_s, self.phi, MISSING_CODE_ESTUDANTE,
+        def cached_marginals(f: int, domain_answers: tuple[int, ...]):
+            if domain_answers not in cache[f]:
+                cache[f][domain_answers] = compute_domain_marginals(
+                    par["ITEMS"], domains[f], domain_answers,
+                    self.mesh_g, self.mesh_s, self.phi, MISSING_CODE_STUDENT,
                 )
-            return cache[f][respostas_dominio]
+            return cache[f][domain_answers]
 
-        n = len(dat)
+        n = len(data)
         thetas = {f: np.full(n, np.nan) for f in factors}
         theta_global = np.full(n, np.nan)
 
         for idx in range(n):
-            respostas_por_dominio = {
-                f: tuple(int(v) for v in dat.iloc[idx][domains[f]]) for f in factors
+            answers_by_domain = {
+                f: tuple(int(v) for v in data.iloc[idx][domains[f]]) for f in factors
             }
             Ls, Ms = {}, {}
             for f in factors:
-                Ls[f], Ms[f] = cached_marginals(f, respostas_por_dominio[f])
+                Ls[f], Ms[f] = cached_marginals(f, answers_by_domain[f])
 
-            thetas_linha = combine_bifactor_posterior(factors, Ls, Ms, self.phi)
-            if np.isnan(thetas_linha[factors[0]]):
+            row_thetas = combine_bifactor_posterior(factors, Ls, Ms, self.phi)
+            if np.isnan(row_thetas[factors[0]]):
                 continue
             for f in factors:
-                thetas[f][idx] = thetas_linha[f]
-            theta_global[idx] = sum(par["WEIGHTS"][f] * thetas_linha[f] for f in factors)
+                thetas[f][idx] = row_thetas[f]
+            theta_global[idx] = sum(par["WEIGHTS"][f] * row_thetas[f] for f in factors)
 
         out = answers.copy()
-        nome = par["DOMAIN_NAME"]
+        name = par["DOMAIN_NAME"]
         for f in factors:
-            out[f"theta{f}_{nome[f]}"] = thetas[f]
+            out[f"theta{f}_{name[f]}"] = thetas[f]
         out["theta_global"] = theta_global
 
         z_global = (theta_global - par["MU_G"]) / par["SIGMA_G"]
@@ -222,29 +207,16 @@ class IQoLCalculator:
         return self.score_batch(df).iloc[0].to_dict()
 
 
-def calculate_index_student(
-    answers: pd.DataFrame | str,
-    caminho_saida: str | None = None,
-) -> pd.DataFrame:
+def calculate_index_student(answers: pd.DataFrame | str) -> pd.DataFrame:
     """Convenience function to score the IQoL (medical students).
 
-    ``answers`` can be an already-loaded DataFrame or a path to a
-    CSV file. If ``caminho_saida`` is given (or ``answers`` is a
-    path), the result is also saved to CSV (``;``-separated).
+    ``answers`` can be an already-loaded DataFrame or a path to a CSV file.
     """
     calc = IQoLCalculator()
 
     if isinstance(answers, str):
-        df_resp = pd.read_csv(answers, sep=None, engine="python")
-        if caminho_saida is None:
-            base, _ = os.path.splitext(answers)
-            caminho_saida = f"{base}_scores_iqol.csv"
+        df_answers = pd.read_csv(answers, sep=None, engine="python")
     else:
-        df_resp = answers
+        df_answers = answers
 
-    out = calc.score_batch(df_resp)
-
-    if caminho_saida is not None:
-        out.to_csv(caminho_saida, index=False, sep=";", encoding="utf-8-sig")
-
-    return out
+    return calc.score_batch(df_answers)

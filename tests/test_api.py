@@ -24,8 +24,8 @@ def test_item_questions_disponivel_na_instancia(calc):
     pt = calc.item_questions(lang="pt")
     assert en["F1_1_enjoymentoflife"] == "28.3. To what extent do you enjoy life?"
     assert pt["F1_1_enjoymentoflife"] == "28.3. O quanto você aproveita a vida?"
-    assert set(en.keys()) == set(calc.itens)
-    assert set(pt.keys()) == set(calc.itens)
+    assert set(en.keys()) == set(calc.items)
+    assert set(pt.keys()) == set(calc.items)
 
 
 def test_nao_calcula_score_centesimal(df_resultado):
@@ -78,10 +78,8 @@ def test_score_physician_omite_tscores_por_dominio(calc):
         assert chave in lote
 
 
-def test_calculate_index_physician_com_caminho_csv(tmp_path):
-    saida = tmp_path / "saida.csv"
-    out = calculate_index_physician(DADOS, caminho_saida=str(saida))
-    assert saida.exists()
+def test_calculate_index_physician_aceita_caminho_csv():
+    out = calculate_index_physician(DADOS)
     assert len(out) == 4
 
 

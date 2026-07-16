@@ -1,9 +1,9 @@
-"""Parâmetros psicométricos da calibração 2024_2, fixados no código-fonte.
+"""Psychometric parameters for the 2024_2 calibration, frozen in source code.
 
-Fonte: Gobbo Jr M et al., BMJ Open 2025;15:e102783 (calibração 2024_2, n=2005).
-Extraídos de ``Tabela_Parametros_AfyaMedQoL_2024_2.xlsx``. Trocar de
-calibração no futuro significa editar os valores abaixo, não trocar um
-arquivo externo.
+Source: Gobbo Jr M et al., BMJ Open 2025;15:e102783 (2024_2 calibration, n=2005).
+Extracted from ``Tabela_Parametros_AfyaMedQoL_2024_2.xlsx``. Changing the
+calibration in the future means editing the values below, not swapping an
+external file.
 """
 
 from __future__ import annotations
@@ -12,18 +12,18 @@ from typing import Any, NamedTuple
 
 import numpy as np
 
-from .constants_physician import ITENS_TODOS, N_CATEGORIAS
+from .constants_physician import ITENS_TODOS, N_CATEGORIES
 
 
 class _ItemParams(NamedTuple):
     item: str
-    fator: str
+    factor: str
     a: float
     b: tuple[float, float, float, float]
 
 
-# item, fator, discriminação (a), thresholds (b1..b4)
-_ITENS_PARAMS: tuple[_ItemParams, ...] = (
+# item, factor, discrimination (a), thresholds (b1..b4)
+_ITEM_PARAMS: tuple[_ItemParams, ...] = (
     _ItemParams("F1_1_enjoymentoflife", "F1", 2.25907121489438,
                 (-2.27022061237598, -0.638638147989716, 0.737967867913462, 2.387662462197)),
     _ItemParams("F1_2_financialsufficiency", "F1", 1.43988656804336,
@@ -52,28 +52,28 @@ _ITENS_PARAMS: tuple[_ItemParams, ...] = (
                 (-1.52520413707683, -0.982164523763152, -0.6498451775552, 0.448475958974047)),
 )
 
-# Domínios independentes por construção (estrutura simples: 1 item -> 1 fator).
+# Independent domains by construction (simple structure: 1 item -> 1 factor).
 _SIGMA = np.array([
     [1.0, 0.0, 0.0],
     [0.0, 1.0, 0.0],
     [0.0, 0.0, 1.0],
 ])
 
-# Pesos do escore global: Σ|a| do fator / Σ|a| total.
+# Global score weights: Σ|a| of the factor / total Σ|a|.
 _PESOS = np.array([0.3961667339121522, 0.3343104738296151, 0.2695227922582326])
 
-# F3 (Estresse) é invertido só na composição do escore global, conforme o artigo.
+# F3 (Stress) is reversed only in the global score composite, per the article.
 _F3_REVERSE_GLOBAL = True
 
-_COL_FATOR = {"F1": 0, "F2": 1, "F3": 2}
+_FACTOR_COL = {"F1": 0, "F2": 1, "F3": 2}
 
 
 def load_parameters_physician() -> dict[str, Any]:
-    """Monta o dicionário de parâmetros da calibração 2024_2 (fixo, sem I/O)."""
-    A = np.zeros((len(_ITENS_PARAMS), 3))
-    B = np.zeros((len(_ITENS_PARAMS), N_CATEGORIAS - 1))
-    for i, p in enumerate(_ITENS_PARAMS):
-        A[i, _COL_FATOR[p.fator]] = p.a
+    """Build the 2024_2 calibration parameters dict (fixed, no I/O)."""
+    A = np.zeros((len(_ITEM_PARAMS), 3))
+    B = np.zeros((len(_ITEM_PARAMS), N_CATEGORIES - 1))
+    for i, p in enumerate(_ITEM_PARAMS):
+        A[i, _FACTOR_COL[p.factor]] = p.a
         B[i] = p.b
 
     return {

@@ -1,4 +1,4 @@
-"""Constantes do modelo Afya MedQoL (calibração 2024_2)."""
+"""Constants for the Afya MedQoL model (2024_2 calibration)."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ ITENS_F3 = [
 ]
 ITENS_TODOS = ITENS_F1 + ITENS_F2 + ITENS_F3
 
-N_CATEGORIAS = 5
+N_CATEGORIES = 5
 N_GRID = 25
 
 # Original questionnaire wording for each item, for display/reference purposes
