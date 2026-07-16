@@ -9,7 +9,7 @@ import numpy as np
 from .constants_physician import N_CATEGORIAS
 
 
-def construir_quadratura(sigma: np.ndarray, n_grid: int, limite: float = 5.0):
+def build_quadrature(sigma: np.ndarray, n_grid: int, limite: float = 5.0):
     """Constrói a grade de quadratura 3D e o prior normal trivariado.
 
     Como Σ é diagonal por construção (domínios independentes), o EAP
@@ -26,7 +26,7 @@ def construir_quadratura(sigma: np.ndarray, n_grid: int, limite: float = 5.0):
     return grid, prior
 
 
-def precomputar_logp_itens(A: np.ndarray, B: np.ndarray, grid: np.ndarray) -> np.ndarray:
+def precompute_item_logp(A: np.ndarray, B: np.ndarray, grid: np.ndarray) -> np.ndarray:
     """Log-probabilidade GRM (Samejima) de cada categoria, por item e nó da grade."""
     n_itens = A.shape[0]
     n_pts = grid.shape[0]
@@ -45,12 +45,12 @@ def precomputar_logp_itens(A: np.ndarray, B: np.ndarray, grid: np.ndarray) -> np
     return out
 
 
-def eap_respondente(
-    respostas: np.ndarray, item_logp: np.ndarray, grid: np.ndarray, prior: np.ndarray
+def compute_eap(
+    answers: np.ndarray, item_logp: np.ndarray, grid: np.ndarray, prior: np.ndarray
 ) -> np.ndarray:
     """Escore EAP (θ_F1, θ_F2, θ_F3) de um respondente a partir das respostas brutas."""
     log_like = np.zeros(grid.shape[0])
-    for i, x in enumerate(respostas):
+    for i, x in enumerate(answers):
         if np.isnan(x):
             continue
         k = int(x) - 1

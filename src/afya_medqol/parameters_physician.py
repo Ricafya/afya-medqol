@@ -68,7 +68,7 @@ _F3_REVERSE_GLOBAL = True
 _COL_FATOR = {"F1": 0, "F2": 1, "F3": 2}
 
 
-def carregar_parametros() -> dict[str, Any]:
+def load_parameters_physician() -> dict[str, Any]:
     """Monta o dicionário de parâmetros da calibração 2024_2 (fixo, sem I/O)."""
     A = np.zeros((len(_ITENS_PARAMS), 3))
     B = np.zeros((len(_ITENS_PARAMS), N_CATEGORIAS - 1))
@@ -77,7 +77,7 @@ def carregar_parametros() -> dict[str, Any]:
         B[i] = p.b
 
     return {
-        "A": A, "B": B, "SIGMA": _SIGMA, "PESOS": _PESOS,
+        "A": A, "B": B, "SIGMA": _SIGMA, "WEIGHTS": _PESOS,
         "F3_REVERSE_GLOBAL": _F3_REVERSE_GLOBAL,
-        "ITENS": ITENS_TODOS,
+        "ITEMS": ITENS_TODOS,
     }

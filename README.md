@@ -1,18 +1,20 @@
 # afya-medqol
 
-Cálculo dos índices de qualidade de vida da Afya, a partir das respostas aos
-instrumentos. Dois modelos, calibrações independentes, ambos com escoragem
-100% determinística (quadratura fixa, sem semente):
+Computes Afya's quality-of-life indices from instrument responses. Two
+models, independent calibrations, both with 100% deterministic scoring
+(fixed quadrature, no random seed):
 
-- **Afya MedQoL** — médicos formados (13 itens, 3 domínios).
-- **IQoL** — estudantes de medicina (8 itens, modelo bifatorial).
+- **Afya MedQoL** — practicing physicians (13 items, 3 domains).
+- **IQoL** — medical students (8 items, bifactor model).
 
-Os parâmetros de ambas as calibrações ficam fixos no código-fonte
+Parameters for both calibrations are frozen in source code
 ([`parameters_physician.py`](src/afya_medqol/parameters_physician.py),
-[`parameters_student.py`](src/afya_medqol/parameters_student.py)) — não há
-leitura de arquivo externo (CSV/Excel) em tempo de execução.
+[`parameters_student.py`](src/afya_medqol/parameters_student.py)) — there is
+no external file (CSV/Excel) read at runtime.
 
-## Instalação
+*(Uma versão em português está disponível em [README.pt-BR.md](README.pt-BR.md).)*
+
+## Installation
 
 ```bash
 pip install afya-medqol
@@ -20,124 +22,153 @@ pip install afya-medqol
 
 ---
 
-## Afya MedQoL (médicos)
+## Afya MedQoL (physicians)
 
-Modelo Samejima GRM (Graded Response Model) tridimensional com escoragem EAP
-(Expected A Posteriori). Calibração fixada em **2024_2** (Gobbo Jr M et al.,
-*BMJ Open* 2025;15:e102783), com domínios independentes (Σ = I): cada domínio
-(F1, F2, F3) funciona como uma régua própria — zerar ou excluir itens de um
-domínio não afeta os outros.
+Three-dimensional Samejima GRM (Graded Response Model) with EAP (Expected A
+Posteriori) scoring. Calibration frozen at **2024_2** (Gobbo Jr M et al.,
+*BMJ Open* 2025;15:e102783), with independent domains (Σ = I): each domain
+(F1, F2, F3) works as its own ruler — zeroing or excluding items from one
+domain does not affect the others.
 
-| Domínio | Descrição | Itens |
+| Domain | Construct | Items |
 |---|---|---|
-| F1 | Qualidade de Vida | 6 itens (`F1_1_enjoymentoflife`, `F1_2_financialsufficiency`, `F1_3_accesstoinformation`, `F1_4_leisureopportunities`, `F1_5_mobilitypast2weeks`, `F1_6_accesstohealthservices`) |
-| F2 | Suporte Institucional / Percepção do Trabalho | 4 itens (`F2_1_technicaltraining`, `F2_2_mentalhealthsupport`, `F2_3_coworkersupportnetwork`, `F2_4_educationalhandlingoferrors`) |
-| F3 | Estresse Percebido | 3 itens (`F3_1_stresshurtsperformance`, `F3_2_stressledtoerrors`, `F3_3_stresshurtsrelationships`) |
+| F1 | Quality of Life | 6 items (`F1_1_enjoymentoflife`, `F1_2_financialsufficiency`, `F1_3_accesstoinformation`, `F1_4_leisureopportunities`, `F1_5_mobilitypast2weeks`, `F1_6_accesstohealthservices`) |
+| F2 | Institutional Support / Work Perception | 4 items (`F2_1_technicaltraining`, `F2_2_mentalhealthsupport`, `F2_3_coworkersupportnetwork`, `F2_4_educationalhandlingoferrors`) |
+| F3 | Perceived Stress | 3 items (`F3_1_stresshurtsperformance`, `F3_2_stressledtoerrors`, `F3_3_stresshurtsrelationships`) |
 
-O escore global combina os três domínios (F3 invertido só na composição do
-global) com pesos proporcionais à discriminação (Σ\|a\|) de cada fator.
+The global score combines the three domains (F3 reversed only in this
+composite) with weights proportional to each factor's discrimination
+(Σ\|a\|).
 
-### Uso como biblioteca
+### Library usage
 
 ```python
 import pandas as pd
 from afya_medqol import MedQoLCalculator
 
-df_respostas = pd.read_csv("respostas.csv")
+df_responses = pd.read_csv("responses.csv")
 
 calc = MedQoLCalculator()
-resultado = calc.calcular(df_respostas)
+result = calc.score_batch(df_responses)
 
-print(resultado[["theta_global", "T_score_global"]])
+print(result[["theta_global", "T_score_global"]])
 ```
 
-Para escorar um único respondente:
+Scoring a single respondent:
 
 ```python
-resultado = calc.score_physician({
+result = calc.score_physician({
     "F1_1_enjoymentoflife": 4,
     "F1_2_financialsufficiency": 3,
-    # ... demais itens (ver afya_medqol.ITENS_TODOS)
+    # ... remaining items (see afya_medqol.ITENS_TODOS)
 })
-print(resultado["theta_global"], resultado["T_score_global"])
+print(result["theta_global"], result["T_score_global"])
 ```
 
-`MedQoLCalculator` precomputa a grade de quadratura e as probabilidades por
-item uma única vez na construção — reutilize a mesma instância ao escorar
-múltiplos lotes.
+To look up the original questionnaire wording for any item, use
+`ITEM_QUESTIONS` (a plain `dict` keyed by item, then by language code —
+`"en"` or `"pt"`) or the `item_questions(lang="en")` method on a calculator
+instance, which returns the flat `item -> text` dict for the requested
+language (English by default):
 
-### Linha de comando
+```python
+from afya_medqol import ITEM_QUESTIONS
+
+print(ITEM_QUESTIONS["F1_1_enjoymentoflife"]["pt"])
+print(calc.item_questions()["F1_1_enjoymentoflife"])            # English (default)
+print(calc.item_questions(lang="pt")["F1_1_enjoymentoflife"])   # Portuguese
+```
+
+`MedQoLCalculator` precomputes the quadrature grid and item probabilities
+once at construction time — reuse the same instance when scoring multiple
+batches.
+
+### Command line
 
 ```bash
-afya-medqol respostas.csv
-afya-medqol respostas.csv --saida resultado.csv
+afya-medqol responses.csv
+afya-medqol responses.csv --saida result.csv
 ```
 
-### Saída
+### Output
 
-- `theta_F1`, `theta_F2`, `theta_F3`, `theta_global`
+- `theta1_quality_of_life`, `theta2_institutional_support`, `theta3_perceived_stress`, `theta_global`
 - `T_score_F1`, `T_score_F2`, `T_score_F3`, `T_score_global` (50 + 10·θ)
 
-`score_physician` (respondente único) omite `T_score_F1`, `T_score_F2` e
-`T_score_F3` do dicionário retornado — continuam disponíveis via `calcular`.
+`score_physician` (single respondent) omits `T_score_F1`, `T_score_F2`, and
+`T_score_F3` from the returned dict — they remain available via `score_batch`.
 
 ---
 
-## IQoL (estudantes de medicina)
+## IQoL (medical students)
 
-Modelo GRM **bifatorial** (Samejima): cada um dos 8 itens carrega num fator
-geral de qualidade de vida (θ_G, comum a todos os itens) e num fator
-específico do seu domínio (θ_S). Fatores ortogonais, prior N(0,1),
-escoragem EAP por integração numérica (grade fixa de 121 nós em [-6, 6]).
-Reproduz Gobbo M Jr et al., *BMJ Open* 2026;16:e106371 (N=10844).
+**Bifactor** GRM model (Samejima): each of the 8 items loads on a general
+quality-of-life factor (θ_G, common to all items) and on a factor specific
+to its domain (θ_S). Orthogonal factors, N(0,1) prior, EAP scoring via
+numerical integration (fixed grid of 121 nodes on [-6, 6]). Reproduces
+Gobbo M Jr et al., *BMJ Open* 2026;16:e106371 (N=10844).
 
-| Domínio | Descrição | Itens |
+| Domain | Construct | Items |
 |---|---|---|
-| 1 | Bem-estar psicológico | `F1_1_overallqol`, `F1_2_satisfactionwithhealth`, `F1_3_enjoymentoflife`, `F1_4_perceivedmeaninginlife` |
-| 2 | Vitalidade | `F2_1_energyfordailyactivities`, `F2_2_satisfactionwithsleep` |
-| 3 | Capacidade funcional percebida | `F3_1_performdailyactivities`, `F3_2_capacityforwork` |
+| 1 | Psychological well-being | `F1_1_overallqol`, `F1_2_satisfactionwithhealth`, `F1_3_enjoymentoflife`, `F1_4_perceivedmeaninginlife` |
+| 2 | Vitality | `F2_1_energyfordailyactivities`, `F2_2_satisfactionwithsleep` |
+| 3 | Perceived functional capacity | `F3_1_performdailyactivities`, `F3_2_capacityforwork` |
 
-O escore global é o composto ponderado dos três domínios (pesos 0.494 /
-0.172 / 0.335, proporcionais à discriminação de cada fator na calibração).
+The global score is the weighted composite of the three domains (weights
+0.494 / 0.172 / 0.335, proportional to each factor's discrimination in the
+calibration).
 
-### Uso como biblioteca
+### Library usage
 
 ```python
 import pandas as pd
 from afya_medqol import IQoLCalculator
 
-df_respostas = pd.read_csv("respostas_estudantes.csv")
+df_responses = pd.read_csv("student_responses.csv")
 
 calc = IQoLCalculator()
-resultado = calc.calcular(df_respostas)
+result = calc.score_batch(df_responses)
 
-print(resultado[["theta_global", "T_score_global"]])
+print(result[["theta_global", "T_score_global"]])
 ```
 
-Para escorar um único estudante:
+Scoring a single student:
 
 ```python
-resultado = calc.score_student({
+result = calc.score_student({
     "F1_1_overallqol": 4, "F1_2_satisfactionwithhealth": 4, "F1_3_enjoymentoflife": 4, "F1_4_perceivedmeaninginlife": 3,
     "F2_1_energyfordailyactivities": 3, "F2_2_satisfactionwithsleep": 4, "F3_1_performdailyactivities": 3, "F3_2_capacityforwork": 3,
 })
-print(resultado["theta_global"], resultado["T_score_global"])
+print(result["theta_global"], result["T_score_global"])
 ```
 
-### Linha de comando
+To look up the original questionnaire wording for any item, use
+`ITEM_QUESTIONS_ESTUDANTE` (a plain `dict` keyed by item, then by language
+code — `"en"` or `"pt"`) or the `item_questions(lang="en")` method on a
+calculator instance:
+
+```python
+from afya_medqol import ITEM_QUESTIONS_ESTUDANTE
+
+print(ITEM_QUESTIONS_ESTUDANTE["F1_1_overallqol"]["pt"])
+print(calc.item_questions()["F1_1_overallqol"])            # English (default)
+print(calc.item_questions(lang="pt")["F1_1_overallqol"])   # Portuguese
+```
+
+### Command line
 
 ```bash
-iqol-estudante respostas_estudantes.csv
-iqol-estudante respostas_estudantes.csv --saida resultado.csv
+iqol-estudante student_responses.csv
+iqol-estudante student_responses.csv --saida result.csv
 ```
 
-### Saída
+### Output
 
-- `theta_bem_estar_psicologico`, `theta_vitalidade`, `theta_capacidade_funcional`, `theta_global`
-- `T_score_global` (50 + 10·z, z-score do θ_global na amostra de referência)
+- `theta1_psychological_well_being`, `theta2_vitality`, `theta3_perceived_functional_capacity`, `theta_global`
+- `T_score_global` (50 + 10·z, θ_global z-score in the reference sample)
 
 ---
 
-## Licença
+## License
 
-Apache License 2.0 — ver [LICENSE](LICENSE).
+Apache License 2.0 — see [LICENSE](LICENSE).

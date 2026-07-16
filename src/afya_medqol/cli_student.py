@@ -1,10 +1,10 @@
-"""CLI: ``iqol-estudante respostas.csv [--saida out.csv]``."""
+"""CLI: ``iqol-estudante answers.csv [--saida out.csv]``."""
 
 from __future__ import annotations
 
 import argparse
 
-from .api import calcular_indice_estudante
+from .api import calculate_index_student
 
 
 def main() -> None:
@@ -12,11 +12,11 @@ def main() -> None:
         prog="iqol-estudante",
         description="Calcula o índice IQoL (estudantes de medicina, GRM bifatorial).",
     )
-    parser.add_argument("respostas", help="CSV com as colunas dos 8 itens (F1_1_overallqol, F1_2_satisfactionwithhealth, F1_3_enjoymentoflife, F1_4_perceivedmeaninginlife, F2_1_energyfordailyactivities, F2_2_satisfactionwithsleep, F3_1_performdailyactivities, F3_2_capacityforwork).")
+    parser.add_argument("answers", help="CSV com as colunas dos 8 itens (F1_1_overallqol, F1_2_satisfactionwithhealth, F1_3_enjoymentoflife, F1_4_perceivedmeaninginlife, F2_1_energyfordailyactivities, F2_2_satisfactionwithsleep, F3_1_performdailyactivities, F3_2_capacityforwork).")
     parser.add_argument("--saida", default=None, help="Caminho do CSV de saída.")
     args = parser.parse_args()
 
-    out = calcular_indice_estudante(args.respostas, args.saida)
+    out = calculate_index_student(args.answers, args.saida)
 
     print(f"OK — {len(out)} respondentes processados")
     print("\nT-score global — média ± dp:")

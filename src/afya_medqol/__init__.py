@@ -10,8 +10,10 @@ determinística (quadratura fixa, sem semente):
       from afya_medqol import MedQoLCalculator
 
       calc = MedQoLCalculator()
-      resultado = calc.calcular(df_respostas)
+      resultado = calc.score_batch(df_respostas)
       resultado_unico = calc.score_physician({"F1_1_enjoymentoflife": 4, ...})
+      calc.item_questions()["F1_1_enjoymentoflife"]  # -> texto original (inglês)
+      calc.item_questions(lang="pt")["F1_1_enjoymentoflife"]  # -> texto original (português)
 
 * **IQoL** (estudantes de medicina, 8 itens) — GRM bifatorial (fator geral +
   fator específico por domínio), escoragem EAP (Gobbo M Jr et al.,
@@ -20,8 +22,10 @@ determinística (quadratura fixa, sem semente):
       from afya_medqol import IQoLCalculator
 
       calc = IQoLCalculator()
-      resultado = calc.calcular(df_respostas)
+      resultado = calc.score_batch(df_respostas)
       resultado_unico = calc.score_student({"F1_1_overallqol": 4, ...})
+      calc.item_questions()["F1_1_overallqol"]  # -> texto original (inglês)
+      calc.item_questions(lang="pt")["F1_1_overallqol"]  # -> texto original (português)
 """
 
 from importlib.metadata import PackageNotFoundError, version
@@ -29,13 +33,14 @@ from importlib.metadata import PackageNotFoundError, version
 from .api import (
     IQoLCalculator,
     MedQoLCalculator,
-    calcular_indice,
-    calcular_indice_estudante,
+    calculate_index_physician,
+    calculate_index_student,
 )
-from .constants_physician import ITENS_F1, ITENS_F2, ITENS_F3, ITENS_TODOS
-from .constants_student import ITENS_ESTUDANTE
-from .parameters_physician import carregar_parametros
-from .parameters_student import carregar_parametros_estudante
+from .constants_physician import ITEM_QUESTIONS, ITENS_F1, ITENS_F2, ITENS_F3, ITENS_TODOS
+from .constants_student import ITEM_QUESTIONS as ITEM_QUESTIONS_ESTUDANTE
+from .constants_student import STUDENT_ITEMS
+from .parameters_physician import load_parameters_physician
+from .parameters_student import load_parameters_student
 
 try:
     __version__ = version("afya-medqol")
@@ -44,15 +49,17 @@ except PackageNotFoundError:  # pragma: no cover - pacote não instalado (execu�
 
 __all__ = [
     "MedQoLCalculator",
-    "calcular_indice",
-    "carregar_parametros",
+    "calculate_index_physician",
+    "load_parameters_physician",
     "ITENS_F1",
     "ITENS_F2",
     "ITENS_F3",
     "ITENS_TODOS",
+    "ITEM_QUESTIONS",
     "IQoLCalculator",
-    "calcular_indice_estudante",
-    "carregar_parametros_estudante",
-    "ITENS_ESTUDANTE",
+    "calculate_index_student",
+    "load_parameters_student",
+    "STUDENT_ITEMS",
+    "ITEM_QUESTIONS_ESTUDANTE",
     "__version__",
 ]

@@ -1,10 +1,10 @@
-"""CLI: ``afya-medqol respostas.csv [--saida out.csv]``."""
+"""CLI: ``afya-medqol answers.csv [--saida out.csv]``."""
 
 from __future__ import annotations
 
 import argparse
 
-from .api import calcular_indice
+from .api import calculate_index_physician
 
 
 def main() -> None:
@@ -12,11 +12,11 @@ def main() -> None:
         prog="afya-medqol",
         description="Calcula o índice Afya MedQoL (calibração 2024_2, régua independente por domínio).",
     )
-    parser.add_argument("respostas", help="CSV com as colunas dos 13 itens.")
+    parser.add_argument("answers", help="CSV com as colunas dos 13 itens.")
     parser.add_argument("--saida", default=None, help="Caminho do CSV de saída.")
     args = parser.parse_args()
 
-    out = calcular_indice(args.respostas, args.saida)
+    out = calculate_index_physician(args.answers, args.saida)
 
     print(f"OK — {len(out)} respondentes processados")
     print("\nT-score — média ± dp:")

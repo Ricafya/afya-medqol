@@ -16,7 +16,7 @@ import numpy as np
 from .constants_student import LIMITE_GRID_ESTUDANTE, N_GRID_ESTUDANTE
 
 
-def construir_quadratura_bifatorial(n_grid: int = N_GRID_ESTUDANTE, limite: float = LIMITE_GRID_ESTUDANTE):
+def build_bifactor_quadrature(n_grid: int = N_GRID_ESTUDANTE, limite: float = LIMITE_GRID_ESTUDANTE):
     """Grade fixa e prior N(0,1) para θ_G e θ_S (mesma grade nas duas dimensões)."""
     grid = np.linspace(-limite, limite, n_grid)
     phi = np.exp(-0.5 * grid**2)
@@ -32,10 +32,10 @@ def _probabilidades_item(item: dict[str, Any], malha_g: np.ndarray, malha_s: np.
     return [1 - cum[0], cum[0] - cum[1], cum[1] - cum[2], cum[2] - cum[3], cum[3]]
 
 
-def marginais_dominio(
+def compute_domain_marginals(
     itens: dict[str, dict[str, Any]],
     cods: list[str],
-    respostas: tuple[int, ...],
+    answers: tuple[int, ...],
     malha_g: np.ndarray,
     malha_s: np.ndarray,
     phi_s: np.ndarray,
@@ -43,7 +43,7 @@ def marginais_dominio(
 ) -> tuple[np.ndarray, np.ndarray]:
     """L(θ_G) e M(θ_G) = ∫_S P(respostas|θ_G,θ_S)·φ(θ_S) dθ_S, integrada e ponderada por θ_S."""
     ll = np.zeros_like(malha_g)
-    for cod, k in zip(cods, respostas):
+    for cod, k in zip(cods, answers):
         if k == missing_code:
             continue
         p = _probabilidades_item(itens[cod], malha_g, malha_s)
@@ -54,30 +54,30 @@ def marginais_dominio(
     return L, M
 
 
-def combinar_posterior_bifatorial(
-    fatores: list[int],
+def combine_bifactor_posterior(
+    factors: list[int],
     Ls: dict[int, np.ndarray],
     Ms: dict[int, np.ndarray],
     phi_g: np.ndarray,
 ) -> dict[int, float]:
     """Combina as marginais L/M por domínio na posterior de θ_G e integra os θ_S (EAP)."""
     post_g = phi_g.copy()
-    for f in fatores:
+    for f in factors:
         post_g = post_g * Ls[f]
     total = post_g.sum()
     if total <= 0 or not np.isfinite(total):
-        return {f: np.nan for f in fatores}
+        return {f: np.nan for f in factors}
     post_g = post_g / total
 
     thetas: dict[int, float] = {}
-    for f in fatores:
+    for f in factors:
         esperanca_s_dado_g = Ms[f] / np.clip(Ls[f], 1e-300, None)
         thetas[f] = float((post_g * esperanca_s_dado_g).sum())
     return thetas
 
 
 def eap_bifatorial(
-    dominios: dict[int, list[str]],
+    domains: dict[int, list[str]],
     respostas_por_dominio: dict[int, tuple[int, ...]],
     itens: dict[str, dict[str, Any]],
     phi_g: np.ndarray,
@@ -87,11 +87,11 @@ def eap_bifatorial(
     missing_code: int,
 ) -> dict[int, float]:
     """EAP dos θ_S específicos (um por domínio) via integração bifatorial."""
-    fatores = sorted(dominios)
+    factors = sorted(domains)
     Ls: dict[int, np.ndarray] = {}
     Ms: dict[int, np.ndarray] = {}
-    for f in fatores:
-        Ls[f], Ms[f] = marginais_dominio(
-            itens, dominios[f], respostas_por_dominio[f], malha_g, malha_s, phi_s, missing_code
+    for f in factors:
+        Ls[f], Ms[f] = compute_domain_marginals(
+            itens, domains[f], respostas_por_dominio[f], malha_g, malha_s, phi_s, missing_code
         )
-    return combinar_posterior_bifatorial(fatores, Ls, Ms, phi_g)
+    return combine_bifactor_posterior(factors, Ls, Ms, phi_g)
