@@ -8,3 +8,6 @@ dist/
 .venv/
 venv/
 *.csv.bak
+usuario/
+docs/
+Tabela_Parametros_AfyaMedQoL_2024_2.xlsx

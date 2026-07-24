@@ -1,4 +1,4 @@
-"""IQoL bifactor psychometric engine: 2D quadrature, GRM, and EAP.
+"""Afya MedQoL Student bifactor psychometric engine: 2D quadrature, GRM, and EAP.
 
 Each item loads on the general QoL factor (θ_G, common to all 8 items) and
 on the factor specific to its domain (θ_S). Orthogonal factors, N(0,1)

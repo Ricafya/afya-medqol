@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "afya-medqol"
-version = "1.25.0"
-description = "Cálculo de índices de qualidade de vida Afya — MedQoL (médicos) e IQoL (estudantes de medicina)."
+version = "1.29.0"
+description = "Cálculo de índices de qualidade de vida Afya — MedQoL (médicos) e Afya MedQoL Student (estudantes de medicina)."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }

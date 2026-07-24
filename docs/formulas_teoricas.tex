@@ -13,7 +13,7 @@
 \usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
 
 \title{Fundamentação Teórica e Fórmulas de Escoragem\\[2pt]
-\large Índices Afya de Qualidade de Vida: MedQoL (médicos) e IQoL (estudantes de medicina)}
+\large Índices Afya de Qualidade de Vida: MedQoL (médicos) e Afya MedQoL Student (estudantes de medicina)}
 \author{Afya}
 \date{\today}
 
@@ -25,8 +25,8 @@
 \noindent
 Este documento consolida, em formato de metodologia de artigo científico, as
 fórmulas teóricas utilizadas na biblioteca \texttt{afya\_medqol} para o
-escoramento de dois instrumentos de qualidade de vida: o \textbf{Afya MedQoL}
-(médicos formados, 13 itens, calibração 2024\_2) e o \textbf{IQoL} (estudantes
+escoramento de dois instrumentos de qualidade de vida: o \textbf{Afya MedQoL Physician}
+(médicos formados, 13 itens, calibração 2024\_2) e o \textbf{Afya MedQoL Student} (estudantes
 de medicina, 8 itens). Ambos os instrumentos utilizam modelos de Teoria de
 Resposta ao Item (TRI) da família do Modelo de Resposta Gradual de Samejima
 (\emph{Graded Response Model}, GRM), com escoragem bayesiana via Esperança a
@@ -46,10 +46,10 @@ Os dois instrumentos aqui descritos diferem na estrutura de fatores latentes
 que representam a qualidade de vida do respondente:
 
 \begin{itemize}
-    \item O \textbf{Afya MedQoL} assume \textbf{três domínios ortogonais e
+    \item O \textbf{Afya MedQoL Physician} assume \textbf{três domínios ortogonais e
     independentes} ($F_1$, $F_2$, $F_3$), cada um escorado por um subconjunto
     de itens que carrega em um único fator (estrutura simples).
-    \item O \textbf{IQoL} assume uma estrutura \textbf{bifatorial}: cada item
+    \item O \textbf{Afya MedQoL Student} assume uma estrutura \textbf{bifatorial}: cada item
     carrega simultaneamente em um fator geral de qualidade de vida
     ($\theta_G$, comum aos 8 itens) e em um fator específico do seu domínio
     ($\theta_{S}$), sendo os fatores especificos ortogonais entre si e ao
@@ -70,7 +70,7 @@ Esta seção apresenta, em duas subseções independentes, o modelo de resposta
 ao item, o procedimento de escoragem bayesiana e as conversões de escala
 utilizados para cada instrumento.
 
-\subsection{Afya MedQoL --- Médicos formados}
+\subsection{Afya MedQoL Physician --- Médicos formados}
 \label{sec:medqol}
 
 \subsubsection{Estrutura do instrumento}
@@ -203,12 +203,12 @@ T_{\text{global}} = 50 + 10\,\hat\theta_{\text{global}}
 \label{eq:medqol-tscore}
 \end{equation}
 
-\subsection{IQoL --- Estudantes de medicina}
+\subsection{Afya MedQoL Student --- Estudantes de medicina}
 \label{sec:iqol}
 
 \subsubsection{Estrutura do instrumento}
 
-O IQoL (\emph{Student Quality of Life Index}) é composto por 8 itens
+O Afya MedQoL Student (\emph{Student Quality of Life Index}) é composto por 8 itens
 distribuídos em três domínios específicos, todos carregando também em um
 fator geral comum:
 
@@ -230,7 +230,7 @@ item é invertido (todos unidirecionais).
 
 \subsubsection{Modelo de resposta ao item: GRM bifatorial}
 
-Diferentemente do MedQoL, o IQoL modela cada respondente por um vetor
+Diferentemente do MedQoL, o Afya MedQoL Student modela cada respondente por um vetor
 $(\theta_G, \theta_{S_1}, \theta_{S_2}, \theta_{S_3})$, em que $\theta_G$ é um
 fator \textbf{geral} de qualidade de vida comum aos 8 itens, e $\theta_{S_f}$
 é o fator \textbf{específico} do domínio $f$. Todos os fatores são
@@ -314,8 +314,8 @@ determinismo total do procedimento.
 
 \subsubsection{Escore composto global}
 
-O escore global do IQoL é o composto ponderado dos três fatores específicos,
-\textbf{sem} inversão de sinal (nenhum domínio é invertido no IQoL):
+O escore global do Afya MedQoL Student é o composto ponderado dos três fatores específicos,
+\textbf{sem} inversão de sinal (nenhum domínio é invertido no Afya MedQoL Student):
 
 \begin{equation}
 \hat\theta_{\text{global}} \;=\; \sum_{f=1}^{3} w_f \, \hat\theta_{S_f}
@@ -328,7 +328,7 @@ $w_2=0{,}172$, $w_3=0{,}335$).
 
 \subsubsection{T-score}
 
-Diferentemente do MedQoL, $\hat\theta_{\text{global}}$ do IQoL é um composto
+Diferentemente do MedQoL, $\hat\theta_{\text{global}}$ do Afya MedQoL Student é um composto
 ponderado e, portanto, não tem variância unitária \emph{a priori}. O T-score
 é obtido por padronização empírica, usando a média $\mu_g$ e o desvio-padrão
 $\sigma_g$ de $\hat\theta_{\text{global}}$ na amostra de referência da
@@ -345,7 +345,7 @@ T_{\text{global}} = 50 + 10\,z
 % =====================================================================
 
 Em ambos os instrumentos, os parâmetros de calibração (discriminações,
-limiares/interceptos, pesos e, no caso do IQoL, também $\mu_g/\sigma_g$) são
+limiares/interceptos, pesos e, no caso do Afya MedQoL Student, também $\mu_g/\sigma_g$) são
 \textbf{fixos e congelados} a partir dos respectivos artigos de validação
 psicométrica, e não são reestimados a cada aplicação.
 A combinação (parâmetros fixos + quadratura fixa + código determinístico)

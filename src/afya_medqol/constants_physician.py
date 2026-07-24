@@ -1,19 +1,19 @@
-"""Constants for the Afya MedQoL model (2024_2 calibration)."""
+"""Constants for the Afya MedQoL Physician model (2024_2 calibration)."""
 
 from __future__ import annotations
 
-ITENS_F1 = [
+ITEMS_F1 = [
     "F1_1_enjoymentoflife", "F1_2_financialsufficiency", "F1_3_accesstoinformation",
     "F1_4_leisureopportunities", "F1_5_mobilitypast2weeks", "F1_6_accesstohealthservices",
 ]
-ITENS_F2 = [
+ITEMS_F2 = [
     "F2_1_technicaltraining", "F2_2_mentalhealthsupport",
     "F2_3_coworkersupportnetwork", "F2_4_educationalhandlingoferrors",
 ]
-ITENS_F3 = [
+ITEMS_F3 = [
     "F3_1_stresshurtsperformance", "F3_2_stressledtoerrors", "F3_3_stresshurtsrelationships",
 ]
-ITENS_TODOS = ITENS_F1 + ITENS_F2 + ITENS_F3
+ITENS_TODOS = ITEMS_F1 + ITEMS_F2 + ITEMS_F3
 
 N_CATEGORIES = 5
 N_GRID = 25
@@ -74,5 +74,64 @@ ITEM_QUESTIONS = {
     "F3_3_stresshurtsrelationships": {
         "en": "60.3. My stress level adversely affects my interpersonal relationships outside the work environment.",
         "pt": "60.3. Meu nível de estresse compromete meu relacionamento fora do ambiente de trabalho.",
+    },
+}
+
+# Original response-option wording for each item, for display/reference
+# purposes only — not used by the scoring pipeline itself. Keyed by item,
+# then by language code ("en", "pt"), each a list of 5 labels ordered from
+# response value 1 to 5.
+ITEM_OPTIONS = {
+    "F1_1_enjoymentoflife": {
+        "en": ["Not at all (1)", "Very little (2)", "Moderately (3)", "Quite a bit (4)", "Extremely (5)"],
+        "pt": ["Nada (1)", "Muito pouco (2)", "Mais ou menos (3)", "Bastante (4)", "Extremamente (5)"],
+    },
+    "F1_2_financialsufficiency": {
+        "en": ["Not at all (1)", "Very little (2)", "Moderately (3)", "Mostly (4)", "Completely (5)"],
+        "pt": ["Nada (1)", "Muito pouco (2)", "Médio (3)", "Muito (4)", "Completamente (5)"],
+    },
+    "F1_3_accesstoinformation": {
+        "en": ["Not at all (1)", "Very little (2)", "Moderately (3)", "Mostly (4)", "Completely (5)"],
+        "pt": ["Nada (1)", "Muito pouco (2)", "Médio (3)", "Muito (4)", "Completamente (5)"],
+    },
+    "F1_4_leisureopportunities": {
+        "en": ["Not at all (1)", "Very little (2)", "Moderately (3)", "Mostly (4)", "Completely (5)"],
+        "pt": ["Nada (1)", "Muito pouco (2)", "Médio (3)", "Muito (4)", "Completamente (5)"],
+    },
+    "F1_5_mobilitypast2weeks": {
+        "en": ["Very poor (1)", "Poor (2)", "Neither poor nor good (3)", "Good (4)", "Very good (5)"],
+        "pt": ["Muito ruim (1)", "Ruim (2)", "Nem ruim, nem bom (3)", "Bom (4)", "Muito bom (5)"],
+    },
+    "F1_6_accesstohealthservices": {
+        "en": ["Very dissatisfied (1)", "Dissatisfied (2)", "Neither satisfied nor dissatisfied (3)", "Satisfied (4)", "Very satisfied (5)"],
+        "pt": ["Muito insatisfeito (1)", "Insatisfeito (2)", "Nem satisfeito, nem insatisfeito (3)", "Satisfeito (4)", "Muito satisfeito (5)"],
+    },
+    "F2_1_technicaltraining": {
+        "en": ["Strongly disagree (1)", "Partially disagree (2)", "Neither agree nor disagree (3)", "Partially agree (4)", "Strongly agree (5)"],
+        "pt": ["Discordo totalmente (1)", "Discordo em parte (2)", "Não concordo nem discordo (3)", "Concordo em parte (4)", "Concordo totalmente (5)"],
+    },
+    "F2_2_mentalhealthsupport": {
+        "en": ["Strongly disagree (1)", "Partially disagree (2)", "Neither agree nor disagree (3)", "Partially agree (4)", "Strongly agree (5)"],
+        "pt": ["Discordo totalmente (1)", "Discordo em parte (2)", "Não concordo nem discordo (3)", "Concordo em parte (4)", "Concordo totalmente (5)"],
+    },
+    "F2_3_coworkersupportnetwork": {
+        "en": ["Strongly disagree (1)", "Partially disagree (2)", "Neither agree nor disagree (3)", "Partially agree (4)", "Strongly agree (5)"],
+        "pt": ["Discordo totalmente (1)", "Discordo em parte (2)", "Não concordo nem discordo (3)", "Concordo em parte (4)", "Concordo totalmente (5)"],
+    },
+    "F2_4_educationalhandlingoferrors": {
+        "en": ["Strongly disagree (1)", "Partially disagree (2)", "Neither agree nor disagree (3)", "Partially agree (4)", "Strongly agree (5)"],
+        "pt": ["Discordo totalmente (1)", "Discordo em parte (2)", "Não concordo nem discordo (3)", "Concordo em parte (4)", "Concordo totalmente (5)"],
+    },
+    "F3_1_stresshurtsperformance": {
+        "en": ["Strongly disagree (1)", "Partially disagree (2)", "Neither agree nor disagree (3)", "Partially agree (4)", "Strongly agree (5)"],
+        "pt": ["Discordo totalmente (1)", "Discordo em parte (2)", "Não concordo nem discordo (3)", "Concordo em parte (4)", "Concordo totalmente (5)"],
+    },
+    "F3_2_stressledtoerrors": {
+        "en": ["Strongly disagree (1)", "Partially disagree (2)", "Neither agree nor disagree (3)", "Partially agree (4)", "Strongly agree (5)"],
+        "pt": ["Discordo totalmente (1)", "Discordo em parte (2)", "Não concordo nem discordo (3)", "Concordo em parte (4)", "Concordo totalmente (5)"],
+    },
+    "F3_3_stresshurtsrelationships": {
+        "en": ["Strongly disagree (1)", "Partially disagree (2)", "Neither agree nor disagree (3)", "Partially agree (4)", "Strongly agree (5)"],
+        "pt": ["Discordo totalmente (1)", "Discordo em parte (2)", "Não concordo nem discordo (3)", "Concordo em parte (4)", "Concordo totalmente (5)"],
     },
 }

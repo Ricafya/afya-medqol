@@ -1,4 +1,4 @@
-"""Psychometric parameters for the IQoL (medical students), frozen in source code.
+"""Psychometric parameters for the Afya MedQoL Student (medical students), frozen in source code.
 
 Source: Gobbo M Jr et al., "Development and psychometric validation of the
 8-item Student Quality of Life Index (IQoL) using item response theory
@@ -55,7 +55,7 @@ _DOMAIN_NAME = {1: "psychological_well_being", 2: "vitality", 3: "perceived_func
 
 
 def load_parameters_student() -> dict[str, Any]:
-    """Build the IQoL parameters dict (fixed, no I/O)."""
+    """Build the Afya MedQoL Student parameters dict (fixed, no I/O)."""
     items: dict[str, dict[str, Any]] = {}
     domains: dict[int, list[str]] = {}
     for p in _STUDENT_ITEM_PARAMS:

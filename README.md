@@ -4,8 +4,8 @@ Computes Afya's quality-of-life indices from instrument responses. Two
 models, independent calibrations, both with 100% deterministic scoring
 (fixed quadrature, no random seed):
 
-- **Afya MedQoL** — practicing physicians (13 items, 3 domains).
-- **IQoL** — medical students (8 items, bifactor model).
+- **Afya MedQoL Physician** — practicing physicians (13 items, 3 domains).
+- **Afya MedQoL Student** — medical students (8 items, bifactor model).
 
 Parameters for both calibrations are frozen in source code
 ([`parameters_physician.py`](src/afya_medqol/parameters_physician.py),
@@ -22,7 +22,7 @@ pip install afya-medqol
 
 ---
 
-## Afya MedQoL (physicians)
+## Afya MedQoL Physician (physicians)
 
 Three-dimensional Samejima GRM (Graded Response Model) with EAP (Expected A
 Posteriori) scoring. Calibration frozen at **2024_2** (Gobbo Jr M et al.,
@@ -44,11 +44,11 @@ composite) with weights proportional to each factor's discrimination
 
 ```python
 import pandas as pd
-from afya_medqol import MedQoLCalculator
+from afya_medqol import MedQoLPhysicianCalculator
 
 df_responses = pd.read_csv("responses.csv")
 
-calc = MedQoLCalculator()
+calc = MedQoLPhysicianCalculator()
 result = calc.score_batch(df_responses)
 
 print(result[["theta_global", "T_score_global"]])
@@ -79,7 +79,7 @@ print(calc.item_questions()["F1_1_enjoymentoflife"])            # English (defau
 print(calc.item_questions(lang="pt")["F1_1_enjoymentoflife"])   # Portuguese
 ```
 
-`MedQoLCalculator` precomputes the quadrature grid and item probabilities
+`MedQoLPhysicianCalculator` precomputes the quadrature grid and item probabilities
 once at construction time — reuse the same instance when scoring multiple
 batches.
 
@@ -93,14 +93,11 @@ afya-medqol responses.csv --saida result.csv
 ### Output
 
 - `theta1_quality_of_life`, `theta2_institutional_support`, `theta3_perceived_stress`, `theta_global`
-- `T_score_F1`, `T_score_F2`, `T_score_F3`, `T_score_global` (50 + 10·θ)
-
-`score_physician` (single respondent) omits `T_score_F1`, `T_score_F2`, and
-`T_score_F3` from the returned dict — they remain available via `score_batch`.
+- `T_score_global` (50 + 10·θ_global)
 
 ---
 
-## IQoL (medical students)
+## Afya MedQoL Student (medical students)
 
 **Bifactor** GRM model (Samejima): each of the 8 items loads on a general
 quality-of-life factor (θ_G, common to all items) and on a factor specific
@@ -122,11 +119,11 @@ calibration).
 
 ```python
 import pandas as pd
-from afya_medqol import IQoLCalculator
+from afya_medqol import MedQoLStudentCalculator
 
 df_responses = pd.read_csv("student_responses.csv")
 
-calc = IQoLCalculator()
+calc = MedQoLStudentCalculator()
 result = calc.score_batch(df_responses)
 
 print(result[["theta_global", "T_score_global"]])
