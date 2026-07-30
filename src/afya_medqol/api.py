@@ -1,4 +1,4 @@
-"""Public pipeline: scoring via MedQoLPhysicianCalculator and MedQoLStudentCalculator."""
+"""Public pipeline: scoring via MedQoLPhysicianCalculator."""
 
 from __future__ import annotations
 
@@ -6,17 +6,8 @@ import numpy as np
 import pandas as pd
 
 from .constants_physician import ITEM_OPTIONS, ITEM_QUESTIONS, ITEMS_F1, ITEMS_F2, ITEMS_F3, N_GRID
-from .constants_student import (
-    ITEM_OPTIONS as ITEM_OPTIONS_ESTUDANTE,
-    ITEM_QUESTIONS as ITEM_QUESTIONS_ESTUDANTE,
-    GRID_LIMIT_STUDENT,
-    MISSING_CODE_STUDENT,
-    N_GRID_STUDENT,
-)
 from .core_physician import build_quadrature, compute_eap, precompute_item_logp
-from .core_student import build_bifactor_quadrature, combine_bifactor_posterior, compute_domain_marginals
 from .parameters_physician import load_parameters_physician
-from .parameters_student import load_parameters_student
 
 
 def _validate_items(answers: pd.DataFrame, items: list[str], label: str) -> pd.DataFrame:
@@ -142,108 +133,5 @@ class MedQoLPhysicianCalculator:
 
     def score_physician(self, answers: dict) -> dict:
         """Score a single respondent passed as a ``{item: answer}`` dict."""
-        df = pd.DataFrame([answers])
-        return self.score_batch(df).iloc[0].to_dict()
-
-
-class MedQoLStudentCalculator:
-    """Afya MedQoL Student index calculator (medical students, 8 items) — bifactor GRM, EAP.
-
-    Reproduces the scoring from Gobbo M Jr et al. (BMJ Open 2026;16:e106371):
-    each item loads on a general QoL factor common to all 8 items and on a
-    factor specific to its domain (psychological well-being, vitality,
-    functional capacity). The 2D quadrature grid is precomputed once at
-    construction time — reuse the same instance when scoring multiple
-    batches.
-    """
-
-    def __init__(self, n_grid: int = N_GRID_STUDENT, limite: float = GRID_LIMIT_STUDENT):
-        self.parameters = load_parameters_student()
-        self.grid, self.phi, self.mesh_g, self.mesh_s = build_bifactor_quadrature(n_grid, limite)
-
-    @property
-    def items(self) -> list[str]:
-        return list(self.parameters["ITEMS"].keys())
-
-    @property
-    def factor_items(self) -> dict[str, list[str]]:
-        """Item codes grouped by factor: ``{"Factor1": [...], "Factor2": [...], "Factor3": [...]}``."""
-        domains = self.parameters["DOMAINS"]
-        return {f"Factor{f}": domains[f] for f in sorted(domains)}
-
-    def item_questions(self, lang: str = "en") -> dict[str, str]:
-        """Original questionnaire wording for each item, keyed by item code.
-
-        ``lang`` selects the translation: ``"en"`` (default) or ``"pt"``.
-        """
-        return {item: translations[lang] for item, translations in ITEM_QUESTIONS_ESTUDANTE.items()}
-
-    def item_options(self, lang: str = "en") -> dict[str, list[str]]:
-        """Original response-option wording for each item, keyed by item code.
-
-        Each value is a list of 5 labels ordered from response value 1 to
-        5. ``lang`` selects the translation: ``"en"`` (default) or ``"pt"``.
-        """
-        return {item: options[lang] for item, options in ITEM_OPTIONS_ESTUDANTE.items()}
-
-    def score_batch(self, answers: pd.DataFrame) -> pd.DataFrame:
-        """Score a DataFrame of Afya MedQoL Student respondents and return a new DataFrame.
-
-        ``answers`` must contain all 8 item columns (see
-        :data:`afya_medqol.constants_student.STUDENT_ITEMS`), each answered
-        for every respondent with an integer from 1 to 5. A blank value,
-        ``999`` (the "not answered" code), or an entirely missing item
-        column all count as an unanswered item; any other value that is not
-        exactly an integer from 1 to 5 counts as invalid. If any respondent
-        has a missing or invalid item, this raises ``ValueError`` naming
-        every affected respondent and item — no scores are computed.
-        """
-        par = self.parameters
-        data = _validate_items(answers, self.items, "MedQoLStudentCalculator.score_batch").astype(int)
-        domains = par["DOMAINS"]
-        factors = sorted(domains)
-
-        cache: dict[int, dict[tuple, tuple[np.ndarray, np.ndarray]]] = {f: {} for f in factors}
-
-        def cached_marginals(f: int, domain_answers: tuple[int, ...]):
-            if domain_answers not in cache[f]:
-                cache[f][domain_answers] = compute_domain_marginals(
-                    par["ITEMS"], domains[f], domain_answers,
-                    self.mesh_g, self.mesh_s, self.phi, MISSING_CODE_STUDENT,
-                )
-            return cache[f][domain_answers]
-
-        n = len(data)
-        thetas = {f: np.full(n, np.nan) for f in factors}
-        theta_global = np.full(n, np.nan)
-
-        for idx in range(n):
-            row = data.iloc[idx]
-            answers_by_domain = {f: tuple(int(v) for v in row[domains[f]]) for f in factors}
-
-            Ls, Ms = {}, {}
-            for f in factors:
-                Ls[f], Ms[f] = cached_marginals(f, answers_by_domain[f])
-
-            row_thetas = combine_bifactor_posterior(factors, Ls, Ms, self.phi)
-            if np.isnan(row_thetas[factors[0]]):
-                continue
-            for f in factors:
-                thetas[f][idx] = row_thetas[f]
-            theta_global[idx] = sum(par["WEIGHTS"][f] * row_thetas[f] for f in factors)
-
-        out = answers.copy()
-        name = par["DOMAIN_NAME"]
-        for f in factors:
-            out[f"theta{f}_{name[f]}"] = thetas[f]
-        out["theta_global"] = theta_global
-
-        z_global = (theta_global - par["MU_G"]) / par["SIGMA_G"]
-        out["T_score_global"] = 50.0 + 10.0 * z_global
-
-        return out
-
-    def score_student(self, answers: dict) -> dict:
-        """Score a single student passed as a ``{item: answer}`` dict."""
         df = pd.DataFrame([answers])
         return self.score_batch(df).iloc[0].to_dict()
